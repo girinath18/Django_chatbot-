@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+        }
+        #chatForm, #chatBox {
+            display: none; /* Initially hide the chat interface */
+        }
+        #chatBox {
+            height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 10px;
+            max-width: 60%;
+        }
+        .user-message {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+        }
+        .bot-message {
+            background-color: #f1f0f0;
+            align-self: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- File Upload Section -->
+        <h2>Upload a Text File</h2>
+        <form id="uploadForm" action="{% url 'upload_file' %}" method="post" enctype="multipart/form-data" class="mb-4">
+            {% csrf_token %}
+            <div class="custom-file mb-3">
+                <input type="file" class="custom-file-input" id="file" name="file" accept=".txt" required>
+                <label class="custom-file-label" for="file">Choose file</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload File</button>
+        </form>
+        <div id="fileResponse" class="alert alert-info" style="display:none;"></div>
+
+        <!-- Chat Interface Section (Hidden initially) -->
+        <div id="chatContainer">
+            <h1>Chat Interface</h1>
+            
+            <!-- Conversation Box -->
+            <div id="chatBox" class="d-flex flex-column">
+                <!-- Messages will be appended here -->
+            </div>
+
+            <!-- Chat Form -->
+            <form id="chatForm" class="mb-3">
+                <div class="input-group">
+                    <input type="text" id="message" class="form-control" placeholder="Type a message" aria-label="Type a message" aria-describedby="sendButton">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit" id="sendButton">Send</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Include Bootstrap JS and jQuery for custom-file-input interaction -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Bootstrap's custom file input label behavior
+        $(document).ready(function () {
+            $('.custom-file-input').on('change', function (event) {
+                var inputFile = event.currentTarget;
+                $(inputFile).parent()
+                    .find('.custom-file-label')
+                    .html(inputFile.files[0].name);
+            });
+        });
+
+        // Function to add messages to the chat box
+        function addMessageToChatBox(message, isUser = false) {
+            const chatBox = document.getElementById('chatBox');
+
+            // Create a message div
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+            messageDiv.innerText = message;
+
+            // Append the message to the chat box
+            chatBox.appendChild(messageDiv);
+
+            // Scroll to the bottom of the chat box
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Handle file upload form submission
+        const uploadForm = document.getElementById('uploadForm');
+        uploadForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(uploadForm);
+            const response = await fetch('/upload_file/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: formData
+            });
+            const data = await response.json();
+            const fileResponse = document.getElementById('fileResponse');
+            fileResponse.style.display = 'block';
+            fileResponse.innerText = data.response || data.error;
+
+            if (data.response) {
+                // If file upload is successful, show the chat interface
+                document.getElementById('chatForm').style.display = 'block';
+                document.getElementById('chatBox').style.display = 'block';
+            }
+        });
+
+        // Handle chat form submission
+        const chatForm = document.getElementById('chatForm');
+        chatForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value;
+            if (!message.trim()) return; // Prevent empty messages
+
+            // Add user's message to the chat box
+            addMessageToChatBox(message, true);
+
+            // Clear the message input
+            messageInput.value = '';
+
+            // Send the message to the server
+            const response = await fetch('/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ message })
+            });
+            const data = await response.json();
+
+            // Add bot's response to the chat box
+            addMessageToChatBox(data.response, false);
+        });
+    </script>
+</body>
+</html>
