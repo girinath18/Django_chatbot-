@@ -1,0 +1,67 @@
+<!-- profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'chat_bot/css/dashboard.css' %}">
+</head>
+<body>
+    <header class="dashboard-header">
+        <button class="sidebar-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i> <!-- Menu icon -->
+        </button>
+        <div class="logo">
+            <i class="fas fa-user-circle"></i>  <!-- Font Awesome user icon -->
+            MyAccount
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li>
+                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" style="background:none; border:none; color:#333; cursor:pointer; padding:10px; transition: background-color 0.3s;">Log out</button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Sidebar Menu -->
+    <div id="sidebar" class="sidebar">
+        <a href="#" onclick="closeSidebar()">Home</a>
+        <a href="{% url 'profile' %}" onclick="closeSidebar()">Profile</a> <!-- Link to profile -->
+        <a href="#" onclick="closeSidebar()">Settings</a>
+        <a href="#" onclick="closeSidebar()">Help</a>
+        <a href="#" onclick="closeSidebar()">About</a>
+        <a href="#" onclick="closeSidebar()">Exit</a>
+    </div>
+
+    <div class="main-content">
+        <h1>Profile Details</h1>
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>Signup Date:</strong> {{ signup_date|date:"Y-m-d" }}</p>
+        <p><strong>Password:</strong> (Not displayed for security reasons)</p>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.style.left === '0px') {
+                sidebar.style.left = '-250px'; // Hide the sidebar
+            } else {
+                sidebar.style.left = '0px'; // Show the sidebar
+            }
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.style.left = '-250px'; // Hide the sidebar
+        }
+    </script>
+</body>
+</html>
