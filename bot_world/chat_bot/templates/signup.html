@@ -1,0 +1,16 @@
+<form method="POST">
+    {% csrf_token %}
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username">
+    <br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password">
+    <br>
+    <button type="submit">Sign Up</button>
+</form>
+
+<!-- Adding the login prompt and button -->
+<p>Already signed up? Directly log in by clicking the login button below:</p>
+<a href="{% url 'login' %}">
+    <button type="button">LOG IN</button>
+</a>
