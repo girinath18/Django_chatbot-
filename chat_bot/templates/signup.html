@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'chat_bot/css/signup.css' %}"> 
+</head>
+<body>
+    <form method="POST">
+        {% csrf_token %}
+        <h1>Sign Up</h1>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Sign Up</button>
+        <p>Already signed up? Directly log in by clicking the login button below:</p>
+        <a href="{% url 'login' %}">
+            <button type="button">LOG IN</button>
+        </a>
+    </form>
+</body>
+</html>
